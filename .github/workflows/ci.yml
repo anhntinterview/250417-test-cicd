@@ -57,4 +57,40 @@ jobs:
           username: master
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull anhntserver/my-app-client:latest
+            cat <<EOF > my-app-client-deployment.yaml
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: my-app-client
+              labels:
+                app: my-app-client
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: my-app-client
+              template:
+                metadata:
+                  labels:
+                    app: my-app-client
+                spec:
+                  containers:
+                  - name: my-app-client
+                    image: anhntserver/my-app-client:latest
+                    ports:
+                    - containerPort: 3002
+            EOF
+
+            cat <<EOF > my-app-client-service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-app-client-service
+            spec:
+              selector:
+                app: my-app-client
+              ports:
+                - port: 11001
+                  targetPort: 3002
+              type: LoadBalancer
+            EOF
