@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Docker image for Next.js (client)
         run: |
-          docker build -f Dockerfile.client -t anhntserver/my-app-client:latest .
+          docker build -f DockerfileCI.client -t anhntserver/my-app-client:latest .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
