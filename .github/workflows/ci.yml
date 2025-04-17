@@ -34,13 +34,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
 
-      # Nếu môi trường là production, chạy npm install thay vì pnpm
-      - name: Install dependencies for production using npm
-        if: github.ref == 'refs/heads/main'
-        run: npm install
-
       - name: Install TurboRepo
-        run: npm install --global turbo
+        run: pnpm install --global turbo
 
       - name: Run Turbo Build
         run: npx turbo build --filter=client --scope=client --production
