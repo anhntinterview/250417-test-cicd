@@ -2,7 +2,7 @@ FROM node:22-slim
 
 WORKDIR /app
 
-COPY /out/apps/client .
+RUN cp -r /out/apps/client .
 
 RUN npm install
 
