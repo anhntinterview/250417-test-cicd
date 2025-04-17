@@ -37,7 +37,7 @@ jobs:
         run: npm install --global turbo
 
       - name: Run Turbo Build
-        run: npx turbo build --filter=client --scope=client --production
+        run: npx turbo build --filter=client --production
 
       - name: Prune TurboRepo
         run: npx turbo prune --scope=client --filter=production
