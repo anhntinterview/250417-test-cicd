@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

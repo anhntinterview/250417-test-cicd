@@ -4,9 +4,6 @@ temp
 
 #Local deployment
 deployment
-Dockerfile.client
-Dockerfile.server
-docker-compose.yml
 
 # Dependencies
 node_modules
