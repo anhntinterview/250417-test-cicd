@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Install pnpm for dev
+        run: npm install -g pnpm@9
+
+      - name: Install dependencies for development using pnpm
+        run: pnpm install
+
       - name: Cache npm dependencies
         uses: actions/cache@v3
         with:
@@ -28,7 +34,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
 
-      - name: Install dependencies
+      # Nếu môi trường là production, chạy npm install thay vì pnpm
+      - name: Install dependencies for production using npm
+        if: github.ref == 'refs/heads/main'
         run: npm install
 
       - name: Install TurboRepo
