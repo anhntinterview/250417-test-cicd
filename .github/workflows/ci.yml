@@ -36,9 +36,6 @@ jobs:
       - name: Install TurboRepo
         run: npm install --global turbo
 
-      - name: Prune TurboRepo
-        run: npx turbo prune --scope=client --docker
-
       - name: Build Docker image for Next.js (client)
         run: |
           docker build -f Dockerfile.client -t anhntserver/my-app-client:latest .
