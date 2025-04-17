@@ -50,18 +50,11 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push anhntserver/my-app-client:latest
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          touch ~/.ssh/250417-github-cicd
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/250417-github-cicd
-          chmod 600 ~/.ssh/250417-github-cicd
-          ssh-keyscan -H 192.168.1.151 >> ~/.ssh/known_hosts
-
-      - name: Access & Deploy to Ubuntu Server
-        run: |
-          ssh -i ~/.ssh/250417-github-cicd master@192.168.1.151
-
-      - name: Pull image and run by kubectl
-        run: |
-          docker pull anhntserver/my-app-client:latest
+      - name: SSH to deploy on server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 192.168.1.151
+          username: master
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull anhntserver/my-app-client:latest
