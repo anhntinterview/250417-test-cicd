@@ -48,5 +48,4 @@ jobs:
 
       - name: Push Docker images to Docker Hub
         run: |
-          docker push anhntserver/client:latest
-          docker push anhntserver/server:latest
+          docker push anhntserver/my-app-client:latest
