@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Build & Prepare Node Env
     runs-on: ubuntu-latest
 
     steps:
@@ -35,15 +36,8 @@ jobs:
 
       - name: Install TurboRepo
         run: npm install --global turbo
-
-      - name: Build Docker image for Next.js (client)
-        run: |
-          docker build -f Dockerfile.cicd-client -t anhntserver/my-app-client:latest .
-
-      - name: Build Docker image for Nest.js (server)
-        run: |
-          docker build -f Dockerfile.cicd-server -t anhntserver/my-app-server:latest .
   push:
+    name: Docker Build & Push Images
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -53,11 +47,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker push anhntserver/my-app-client:latest
-          docker push anhntserver/my-app-server:latest
+      - name: Build Docker image for client and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.cicd-client
+          push: true
+          tags: anhntserver/my-app-client:latest
+
+      - name: Build Docker image for server and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.cicd-server
+          push: true
+          tags: anhntserver/my-app-server:latest
   deploy:
+    name: Deploy via SSH to K8s Server
     needs: push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
