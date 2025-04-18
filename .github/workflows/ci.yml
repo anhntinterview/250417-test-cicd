@@ -104,7 +104,7 @@ jobs:
             apiVersion: v1
             kind: Service
             metadata:
-              name: my-app-client-service
+              name: my-app-client-ingress-service
             spec:
               type: ClusterIP
               ports:
@@ -137,7 +137,7 @@ jobs:
                     pathType: Prefix
                     backend:
                       service:
-                        name: my-app-client-service
+                        name: my-app-client-ingress-service
                         port:
                           number: 9001
             EOF
@@ -189,7 +189,7 @@ jobs:
             apiVersion: v1
             kind: Service
             metadata:
-              name: my-app-server-service
+              name: my-app-server-ingress-service
             spec:
               type: ClusterIP
               ports:
@@ -222,7 +222,7 @@ jobs:
                     pathType: Prefix
                     backend:
                       service:
-                        name: my-app-server-service
+                        name: my-app-server-ingress-service
                         port:
                           number: 9002
             EOF
