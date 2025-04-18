@@ -43,7 +43,10 @@ jobs:
       - name: Build Docker image for Nest.js (server)
         run: |
           docker build -f Dockerfile.cicd-server -t anhntserver/my-app-server:latest .
-
+  push:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -54,7 +57,12 @@ jobs:
         run: |
           docker push anhntserver/my-app-client:latest
           docker push anhntserver/my-app-server:latest
-
+  deploy:
+    needs: push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - run: echo "Deploy step"
       - name: SSH to deploy on server
         uses: appleboy/ssh-action@v1.0.0
         with:
