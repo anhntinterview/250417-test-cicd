@@ -3,10 +3,10 @@ name: CI/CD for TurboRepo with Docker
 on:
   push:
     branches:
-      - main # Hoặc branch bạn muốn theo dõi
+      - main
   pull_request:
     branches:
-      - main # Hoặc branch bạn muốn theo dõi
+      - main
 
 jobs:
   build:
@@ -29,7 +29,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-modules-
 
-      # Nếu môi trường là production, chạy npm install thay vì pnpm
       - name: Install dependencies for production using npm
         if: github.ref == 'refs/heads/main'
         run: npm install
@@ -39,7 +38,11 @@ jobs:
 
       - name: Build Docker image for Next.js (client)
         run: |
-          docker build -f DockerfileCI.client -t anhntserver/my-app-client:latest .
+          docker build -f Dockerfile.cicd-client -t anhntserver/my-app-client:latest .
+
+      - name: Build Docker image for Nest.js (server)
+        run: |
+          docker build -f Dockerfile.cicd-server -t anhntserver/my-app-server:latest .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -48,7 +51,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Docker image to Docker Hub
-        run: docker push anhntserver/my-app-client:latest
+        run: |
+          docker push anhntserver/my-app-client:latest
+          docker push anhntserver/my-app-server:latest
 
       - name: SSH to deploy on server
         uses: appleboy/ssh-action@v1.0.0
@@ -65,7 +70,7 @@ jobs:
               labels:
                 app: my-app-client
             spec:
-              replicas: 1
+              replicas: 2
               selector:
                 matchLabels:
                   app: my-app-client
@@ -75,10 +80,10 @@ jobs:
                     app: my-app-client
                 spec:
                   containers:
-                  - name: my-app-client
-                    image: anhntserver/my-app-client:latest
-                    ports:
-                    - containerPort: 3002
+                    - name: my-app-client
+                      image: anhntserver/my-app-client:latest
+                      ports:
+                      - containerPort: 3002
             EOF
 
             cat <<EOF > my-app-client-service.yaml
@@ -94,3 +99,135 @@ jobs:
                   targetPort: 3002
               type: LoadBalancer
             EOF
+
+            cat <<EOF > my-app-client-ingress-service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-app-client-service
+            spec:
+              type: ClusterIP
+              ports:
+                  - port: 9001
+                    targetPort: 3002
+                    protocol: TCP
+              selector:
+                  app: my-app-client
+            EOF
+
+            cat <<EOF > my-app-client-ingress.yaml
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: my-app-client-ingress
+              annotations:
+                nginx.ingress.kubernetes.io/ssl-redirect: "true"
+                nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+            spec:
+              ingressClassName: nginx
+              tls:
+              - hosts: 
+                - my-app.freedomwalking.net
+                secretName: dummy-tls-secret-01
+              rules:
+              - host: my-app.freedomwalking.net
+                http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: my-app-client-service
+                        port:
+                          number: 9001
+            EOF
+
+            kubectl apply -f my-app-client-deployment.yaml
+            kubectl apply -f my-app-client-service.yaml
+            kubectl apply -f my-app-client-ingress-service.yaml
+            kubectl apply -f my-app-client-ingress.yaml
+
+            cat <<EOF > my-app-server-deployment.yaml
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: my-app-server
+              labels:
+                app: my-app-server
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: my-app-server
+              template:
+                metadata:
+                  labels:
+                    app: my-app-server
+                spec:
+                  containers:
+                  - name: my-app-server
+                    image: anhntserver/my-app-server:latest
+                    ports:
+                    - containerPort: 3001
+            EOF
+
+            cat <<EOF > my-app-server-service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-app-server-service
+            spec:
+              selector:
+                app: my-app-server
+              ports:
+                - port: 11002
+                  targetPort: 3001
+              type: LoadBalancer
+            EOF
+
+            cat <<EOF > my-app-server-ingress-service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-app-server-service
+            spec:
+              type: ClusterIP
+              ports:
+                  - port: 9002
+                    targetPort: 3001
+                    protocol: TCP
+              selector:
+                  app: my-app-server
+            EOF
+
+            cat <<EOF > my-app-server-ingress.yaml
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: my-app-server-ingress
+              annotations:
+                nginx.ingress.kubernetes.io/ssl-redirect: "true"
+                nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+            spec:
+              ingressClassName: nginx
+              tls:
+              - hosts: 
+                - my-app-server.freedomwalking.net
+                secretName: dummy-tls-secret-02
+              rules:
+              - host: my-app-server.freedomwalking.net
+                http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: my-app-server-service
+                        port:
+                          number: 9002
+            EOF
+
+            kubectl apply -f my-app-server-deployment.yaml
+            kubectl apply -f my-app-server-service.yaml
+            kubectl apply -f my-app-server-ingress-service.yaml
+            kubectl apply -f my-app-server-ingress.yaml

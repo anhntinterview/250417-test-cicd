@@ -5,6 +5,7 @@ ssh
 
 #Local deployment
 deployment
+local-deployment
 Dockerfile.client
 Dockerfile.server
 docker-compose.yml
