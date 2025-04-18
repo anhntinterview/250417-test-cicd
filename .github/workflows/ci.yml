@@ -144,8 +144,8 @@ jobs:
 
             kubectl apply -f my-app-client-deployment.yaml
             kubectl apply -f my-app-client-service.yaml
-            kubectl apply -f my-app-client-ingress-service.yaml
             kubectl apply -f my-app-client-ingress.yaml
+            kubectl apply -f my-app-client-ingress-service.yaml
 
             cat <<EOF > my-app-server-deployment.yaml
             apiVersion: apps/v1
@@ -229,5 +229,5 @@ jobs:
 
             kubectl apply -f my-app-server-deployment.yaml
             kubectl apply -f my-app-server-service.yaml
-            kubectl apply -f my-app-server-ingress-service.yaml
             kubectl apply -f my-app-server-ingress.yaml
+            kubectl apply -f my-app-server-ingress-service.yaml
