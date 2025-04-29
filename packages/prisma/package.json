@@ -1,0 +1,23 @@
+{
+  "name": "@repo/prisma",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.2",
+    "prisma": "^6.6.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "@prisma/client": "6.6.0"
+  }
+}

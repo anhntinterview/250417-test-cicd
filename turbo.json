@@ -33,11 +33,9 @@
       "inputs": ["$TURBO_DEFAULT$"]
     },
     "start": {
-      "dependsOn": ["prisma:generate"],
       "cache": false
     },
     "start:dev": {
-      "dependsOn": ["prisma:generate"],
       "cache": false,
       "persistent": true
     },
